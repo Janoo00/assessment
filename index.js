@@ -1,69 +1,51 @@
-// const https = require("https")
-
-// const options={
-//     hostname : 'time.com',
-//     path: '/',
-//     method: 'GET',
-// }
-
-// const req = https.request(options,(res)=>{
-//     let data = '';
-//     res.on('data',(chunk)=>{data += chunk;})
-//     res.on('end',()=>{
-//         const stories =[]
-//         const regex = /<article[\s\S]*?<h3>([s\S]*?)</h3> 
-        
-
-//     })
-// })
 const https = require('https');
 
-// Step 1: Time.com se data mangna
+// Step 1: taking data from Time.com 
 https.get('https://time.com', (res) => {
     let data = '';
 
-    // Step 2: Saara data ikattha karna
+    // Step 2: gathering all the data
     res.on('data', (chunk) => {
         data += chunk;
     });
 
-    // Step 3: Data milne ke baad
+    // Step 3: after data received
     res.on('end', () => {
-        const stories = []; // Stories ko rakhne ke liye list (array)
+        const stories = []; // list to keep stories (array)
         let count = 0;
         let searchFrom = 0; // Start index for searching
 
-        // Step 4: 6 stories dhoondhna
+        // Step 4: 6 finding stories 
         while (count < 6) {
-            // 1. Pehle article tag dhoondho
+            // 1. first find article tag 
             const articleIndex = data.indexOf('<article', searchFrom);
-            if (articleIndex === -1) break; // Agar nahi milta, break kar do
+            if (articleIndex === -1) break; // if not fount then break it
 
-            // 2. Fir h3 tag dhoondho (title ke liye)
+            // 2. then find h3 tag  (for title)
             const titleStart = data.indexOf('<h3>', articleIndex);
             const titleEnd = data.indexOf('</h3>', titleStart);
             if (titleStart === -1 || titleEnd === -1) break;
 
-            // 3. Title ko nikaalo aur clean karo
+            // 3. remove and clean uo the title
             const title = data.substring(titleStart + 4, titleEnd).trim();
 
-            // 4. Ab link dhoondho
+            // 4. lets find the link
             const linkStart = data.indexOf('href="', articleIndex);
             const linkEnd = data.indexOf('"', linkStart + 6);
             if (linkStart === -1 || linkEnd === -1) break;
 
-            // 5. Link ko nikaalo aur complete URL banao
+            // 5. extract the link and create the complete URL
             const link = 'https://time.com' + data.substring(linkStart + 6, linkEnd);
 
-            // 6. Title aur link ko stories list mein add karo
+            // 6. add title and link to story list
             stories.push({ title, link });
             count++;
 
-            // 7. Next article ke liye search position ko update karo
+            // 7. update search position for next article
             searchFrom = articleIndex + 1;
         }
 
-        // Step 5: Stories ko print karo
+        // Step 5: print the stories
         console.log(stories);
     });
 // }).on('error', (e) => {
